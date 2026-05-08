@@ -1,5 +1,3 @@
----
-
 ## 1. Great Snakes
 
 ### Core idea / Основная идея

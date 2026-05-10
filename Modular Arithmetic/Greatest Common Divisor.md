@@ -1,23 +1,37 @@
 # GCD and Extended GCD — CryptoHack Notes
 
-# Greatest Common Divisor (GCD)
+# 1. Greatest Common Divisor
 
 ## Main Idea
 
-The Greatest Common Divisor (GCD) is the largest number that divides two integers without remainder.
+The Greatest Common Divisor, or GCD, is the largest integer that divides two positive integers without remainder.
 
-The entire idea behind GCD:
-- repeatedly reduce the problem;
-- use remainders;
-- eventually reach zero;
-- the last non-zero remainder is the answer.
+For example:
 
-This is the foundation of:
-- RSA;
-- modular arithmetic;
-- modular inverse;
-- Bézout identity;
-- finite field arithmetic.
+| Numbers | Common divisors | GCD |
+|---|---:|---:|
+| 12 and 8 | 1, 2, 4 | 4 |
+| 7 and 9 | 1 | 1 |
+| 81 and 57 | 1, 3 | 3 |
+
+The GCD is important because it tells us whether two numbers share a factor.
+
+If:
+
+```text
+gcd(a, b) = 1
+```
+
+then `a` and `b` are called **coprime**.
+
+<details>
+<summary>Русский вывод</summary>
+
+НОД показывает самый большой общий делитель двух чисел.
+
+Если НОД равен `1`, значит числа взаимно простые.
+
+</details>
 
 ---
 
@@ -28,62 +42,162 @@ This is the foundation of:
 
 Greatest Common Divisor
 
-The Greatest Common Divisor (GCD), sometimes known as the highest common factor, is the largest number which divides two positive integers (a,b).
+The Greatest Common Divisor (GCD), sometimes known as the highest common factor, is the largest number which divides two positive integers `(a,b)`.
 
-For a=12,b=8 we can calculate the divisors of a: {1,2,3,4,6,12} and the divisors of b: {1,2,4,8}. Comparing these two, we see that gcd(a,b)=4.
+For `a=12,b=8` we can calculate the divisors of `a`: `{1,2,3,4,6,12}` and the divisors of `b`: `{1,2,4,8}`. Comparing these two, we see that `gcd(a,b)=4`.
 
-Now calculate gcd(a,b) for a=66528,b=52920.
+Now calculate `gcd(a,b)` for:
+
+```text
+a = 66528
+b = 52920
+```
 
 </details>
 
 <details>
-<summary>Русский перевод</summary>
+<summary>Русский перевод задания</summary>
 
-Наибольший общий делитель (НОД) — это наибольшее число, которое делит два числа без остатка.
+Найдите наибольший общий делитель для:
 
-Найдите gcd(a,b) для:
-- a = 66528
-- b = 52920
+```text
+a = 66528
+b = 52920
+```
+
+То есть нужно найти самое большое число, на которое оба числа делятся без остатка.
 
 </details>
 
 ---
 
-# Solving the Challenge
+# 2. Solving the GCD Challenge
 
-We use Euclid's Algorithm:
+We need to calculate:
 
-\[
-gcd(a,b)=gcd(b,a \bmod b)
-\]
+```text
+gcd(66528, 52920)
+```
 
-Continue until remainder becomes zero.
+A naive method would be:
+1. list all divisors of `66528`;
+2. list all divisors of `52920`;
+3. compare both lists;
+4. choose the largest common divisor.
+
+But this is slow for large numbers.
+
+Instead, we use the **Euclidean Algorithm**.
 
 ---
 
-## Step-by-step
+## Euclidean Algorithm Formula
 
-\[
-66528 \mod 52920 = 13608
-\]
+```text
+gcd(a, b) = gcd(b, a mod b)
+```
 
-\[
-52920 \mod 13608 = 12096
-\]
+This means:
 
-\[
-13608 \mod 12096 = 1512
-\]
+```text
+Instead of solving gcd(a, b),
+solve gcd(b, remainder).
+```
 
-\[
-12096 \mod 1512 = 0
-\]
+We repeat this until the remainder becomes zero.
 
-Last non-zero remainder:
+The last non-zero remainder is the GCD.
 
-\[
+---
+
+## Step-by-step Table
+
+| Step | Current `a` | Current `b` | Operation | Remainder |
+|---:|---:|---:|---|---:|
+| 1 | 66528 | 52920 | `66528 % 52920` | 13608 |
+| 2 | 52920 | 13608 | `52920 % 13608` | 12096 |
+| 3 | 13608 | 12096 | `13608 % 12096` | 1512 |
+| 4 | 12096 | 1512 | `12096 % 1512` | 0 |
+
+When the remainder becomes `0`, we stop.
+
+The last non-zero remainder was:
+
+```text
+1512
+```
+
+So:
+
+```text
+gcd(66528, 52920) = 1512
+```
+
+<details>
+<summary>Русский вывод</summary>
+
+Ответ:
+
+```text
+1512
+```
+
+Последний ненулевой остаток в алгоритме Евклида — это и есть НОД.
+
+</details>
+
+---
+
+## Same Solution in Division Form
+
+Sometimes the Euclidean Algorithm is easier to understand if written as ordinary division:
+
+```text
+66528 = 1 × 52920 + 13608
+52920 = 3 × 13608 + 12096
+13608 = 1 × 12096 + 1512
+12096 = 8 × 1512  + 0
+```
+
+The final non-zero remainder is:
+
+```text
+1512
+```
+
+Therefore:
+
+```text
 gcd = 1512
-\]
+```
+
+---
+
+## Why the Division Form Helps
+
+Each line has this structure:
+
+```text
+a = quotient × b + remainder
+```
+
+For example:
+
+```text
+66528 = 1 × 52920 + 13608
+```
+
+This means:
+
+```text
+13608 = 66528 - 1 × 52920
+```
+
+So the remainder is built from the previous two numbers.
+
+This is the key idea behind both:
+- Euclidean Algorithm;
+- Extended Euclidean Algorithm.
 
 ---
 
@@ -92,116 +206,177 @@ gcd = 1512
 ```python
 def gcd(a, b):
     while b != 0:
+        # Replace the larger problem gcd(a, b)
+        # with the smaller problem gcd(b, a % b)
         a, b = b, a % b
+
+    # When b becomes 0, a is the last non-zero remainder
     return a
+
 
 print(gcd(66528, 52920))
 ```
 
----
-
-## Why This Works
-
-If a number divides both:
-- a
-- b
-
-then it also divides:
-
-\[
-a - qb
-\]
-
-which is exactly the remainder operation.
-
-This means:
-- we can safely replace numbers;
-- without changing the common divisor.
-
-That is why the algorithm works.
-
----
-
-# Visual Representation
+Output:
 
 ```text
-66528
- └── 52920 remainder 13608
-        └── 13608 remainder 12096
-               └── 12096 remainder 1512
-                      └── 1512 remainder 0
-
-Answer = 1512
+1512
 ```
 
 ---
 
-# Common Mistakes
-
-## 1. Swapping modulo order incorrectly
-
-Wrong:
+## Code Explanation
 
 ```python
-a % b
-b % a
+while b != 0:
 ```
 
-without updating variables correctly.
-
-Correct:
+Keep going until the second number becomes zero.
 
 ```python
 a, b = b, a % b
 ```
 
----
+This line does two things at once:
 
-## 2. Forgetting termination condition
+| Old value | New value |
+|---|---|
+| `a` | becomes old `b` |
+| `b` | becomes `a % b` |
 
-Wrong:
+So this:
 
-```python
-while a != 0
+```text
+gcd(66528, 52920)
 ```
 
-Usually easier:
+becomes:
 
-```python
-while b != 0
+```text
+gcd(52920, 13608)
+```
+
+then:
+
+```text
+gcd(13608, 12096)
+```
+
+then:
+
+```text
+gcd(12096, 1512)
+```
+
+then:
+
+```text
+gcd(1512, 0)
+```
+
+At that point the answer is `1512`.
+
+---
+
+# 3. Why Euclid's Algorithm Works
+
+Suppose:
+
+```text
+a = q × b + r
+```
+
+where:
+- `q` is the quotient;
+- `r` is the remainder.
+
+Then:
+
+```text
+r = a - q × b
+```
+
+Any number that divides both `a` and `b` also divides:
+
+```text
+a - q × b
+```
+
+So it also divides `r`.
+
+That means:
+
+```text
+gcd(a, b) = gcd(b, r)
+```
+
+This is why we are allowed to replace:
+
+```text
+gcd(a, b)
+```
+
+with:
+
+```text
+gcd(b, a mod b)
 ```
 
 ---
 
-## 3. Confusing division with modulo
+## Visual Flow
 
-Modulo gives remainder, not quotient.
+```text
+gcd(66528, 52920)
+        |
+        v
+gcd(52920, 13608)
+        |
+        v
+gcd(13608, 12096)
+        |
+        v
+gcd(12096, 1512)
+        |
+        v
+gcd(1512, 0)
+        |
+        v
+1512
+```
 
 ---
 
-# Extended GCD
+# 4. Extended GCD
 
 ## Main Idea
 
-Extended Euclidean Algorithm not only finds:
+The Extended Euclidean Algorithm finds not only:
 
-\[
-gcd(a,b)
-\]
+```text
+gcd(a, b)
+```
 
-but also integers:
+but also numbers `u` and `v` such that:
 
-\[
-u,v
-\]
+```text
+a × u + b × v = gcd(a, b)
+```
 
-such that:
+This equation is called **Bézout's Identity**.
 
-\[
-au+bv=gcd(a,b)
-\]
+---
 
-This is called Bézout's Identity.
+## Why This Matters
+
+In cryptography, Extended GCD is used to find modular inverses.
+
+A modular inverse is needed in:
+- RSA private key generation;
+- modular division;
+- finite fields;
+- Chinese Remainder Theorem;
+- many cryptographic attacks and constructions.
 
 ---
 
@@ -210,295 +385,440 @@ This is called Bézout's Identity.
 <details>
 <summary>Original task (EN)</summary>
 
-Using the two primes p=26513,q=32321, find the integers u,v such that
+Extended GCD
 
-\[
-p\cdot u + q\cdot v = gcd(p,q)
-\]
+Let `a` and `b` be positive integers.
 
-Enter whichever of u and v is the lower number as the flag.
+The extended Euclidean algorithm is an efficient way to find integers `u,v` such that
+
+```text
+a × u + b × v = gcd(a,b)
+```
+
+Using the two primes:
+
+```text
+p = 26513
+q = 32321
+```
+
+find the integers `u,v` such that
+
+```text
+p × u + q × v = gcd(p,q)
+```
+
+Enter whichever of `u` and `v` is the lower number as the flag.
 
 </details>
 
 <details>
-<summary>Русский перевод</summary>
+<summary>Русский перевод задания</summary>
 
-Используя:
-- p = 26513
-- q = 32321
+Даны два простых числа:
 
-найдите числа u и v такие, что:
+```text
+p = 26513
+q = 32321
+```
 
-\[
-p\cdot u + q\cdot v = gcd(p,q)
-\]
+Нужно найти такие целые числа `u` и `v`, что:
 
-Введите меньшее число.
+```text
+p × u + q × v = gcd(p, q)
+```
+
+В качестве ответа нужно ввести меньшее из чисел `u` и `v`.
 
 </details>
 
 ---
 
-# Important Observation
+# 5. Solving the Extended GCD Challenge
 
-Both numbers are prime.
+We need:
 
-Therefore:
+```text
+26513 × u + 32321 × v = gcd(26513, 32321)
+```
 
-\[
-gcd(p,q)=1
-\]
+Since both numbers are prime and different:
 
-This is extremely important in cryptography.
+```text
+gcd(26513, 32321) = 1
+```
 
-RSA depends on coprime numbers.
+So the equation becomes:
+
+```text
+26513 × u + 32321 × v = 1
+```
 
 ---
 
-# Solving
-
-We use Extended Euclidean Algorithm.
-
----
-
-## Python Code
+## Extended GCD Python Solution
 
 ```python
 def extended_gcd(a, b):
+    # Base case:
+    # gcd(a, 0) = a
     if b == 0:
         return a, 1, 0
 
-    gcd, x1, y1 = extended_gcd(b, a % b)
+    # Recursive step:
+    # solve smaller problem first
+    gcd_value, x1, y1 = extended_gcd(b, a % b)
 
+    # Rebuild coefficients for the original pair (a, b)
     x = y1
     y = x1 - (a // b) * y1
 
-    return gcd, x, y
+    return gcd_value, x, y
 
 
 g, u, v = extended_gcd(26513, 32321)
 
-print(g)
-print(u, v)
+print("gcd:", g)
+print("u:", u)
+print("v:", v)
+print("lower:", min(u, v))
 ```
 
----
-
-## Result
+Output:
 
 ```text
-u = 10245
-v = -8404
+gcd: 1
+u: 10245
+v: -8404
+lower: -8404
 ```
 
-Smaller value:
+So the answer is:
 
-\[
+```text
 -8404
-\]
-
----
+```
 
 <details>
 <summary>Русский вывод</summary>
 
 Ответ:
 
-\[
+```text
 -8404
-\]
+```
+
+Потому что:
+
+```text
+u = 10245
+v = -8404
+```
+
+Меньшее из этих двух чисел — `-8404`.
 
 </details>
 
 ---
 
-# Why Extended GCD Works
+## Verification
 
-Normal Euclidean Algorithm:
+Check the equation:
 
 ```text
-a = qb + r
+26513 × 10245 + 32321 × (-8404)
 ```
 
-replaces numbers.
+Compute:
 
-Extended GCD tracks:
-- how every remainder was built;
-- from previous values.
+```text
+26513 × 10245 = 271825685
+32321 × (-8404) = -271825684
+```
 
-Eventually:
+Then:
 
-\[
-1 = au+bv
-\]
+```text
+271825685 - 271825684 = 1
+```
 
-which gives coefficients directly.
+So:
 
----
+```text
+26513 × 10245 + 32321 × (-8404) = 1
+```
 
-# Core Cryptography Importance
+That matches:
 
-Extended GCD is used for:
-
-| Topic | Why |
-|---|---|
-| RSA | Private key generation |
-| Modular inverse | Needed for division mod n |
-| ECC | Finite field operations |
-| CRT | Chinese Remainder Theorem |
+```text
+gcd(26513, 32321) = 1
+```
 
 ---
 
-# Modular Inverse
+# 6. Extended GCD by Table
+
+Extended GCD can also be tracked with a table.
+
+For every step, we write each remainder as:
+
+```text
+remainder = p × coefficient_for_p + q × coefficient_for_q
+```
+
+Initial values:
+
+| Value | As combination of `p` and `q` |
+|---:|---|
+| `p = 26513` | `1 × p + 0 × q` |
+| `q = 32321` | `0 × p + 1 × q` |
+
+The algorithm then keeps updating these coefficients until the remainder becomes `1`.
+
+Final useful row:
+
+| GCD | Coefficient of `p` | Coefficient of `q` |
+|---:|---:|---:|
+| 1 | 10245 | -8404 |
+
+So:
+
+```text
+1 = 26513 × 10245 + 32321 × (-8404)
+```
+
+---
+
+# 7. Difference Between GCD and Extended GCD
+
+| Algorithm | Finds | Example Output |
+|---|---|---|
+| Euclidean Algorithm | only `gcd(a,b)` | `1512` |
+| Extended Euclidean Algorithm | `gcd(a,b)` and coefficients | `gcd=1, u=10245, v=-8404` |
+
+Normal GCD answers:
+
+```text
+What is the greatest common divisor?
+```
+
+Extended GCD answers:
+
+```text
+How can this GCD be built from the original numbers?
+```
+
+---
+
+# 8. Connection to Modular Inverse
 
 If:
 
-\[
-ax \equiv 1 \pmod n
-\]
+```text
+a × x + n × y = 1
+```
 
 then:
 
-\[
-x=a^{-1}\pmod n
-\]
+```text
+a × x ≡ 1 mod n
+```
 
-Extended GCD finds this inverse.
+So `x` is the modular inverse of `a` modulo `n`.
 
----
-
-# Example
-
-Find inverse of:
-
-\[
-15^{-1}\pmod{26}
-\]
-
-We solve:
-
-\[
-15x+26y=1
-\]
-
-Result:
-
-\[
-x=7
-\]
-
-because:
-
-\[
-15\cdot7=105\equiv1\pmod{26}
-\]
-
----
-
-# Full Algorithm Intuition
-
-## Euclidean Algorithm
+That means Extended GCD can solve:
 
 ```text
-gcd(a,b)
-↓
-gcd(b,a mod b)
-↓
-gcd(r1,r2)
-↓
-...
-↓
-0
+a^(-1) mod n
 ```
 
----
-
-## Extended GCD
-
-Tracks:
+Example:
 
 ```text
-remainder = ax + by
+15 × 7 = 105
+105 mod 26 = 1
 ```
 
-for every step.
+So:
+
+```text
+15^(-1) mod 26 = 7
+```
 
 ---
 
-# Typical Errors
+# 9. Why Extended GCD Works
 
-## 1. Returning coefficients in wrong order
+Euclidean Algorithm repeatedly creates remainders:
 
-Very common mistake.
+```text
+a = q × b + r
+```
+
+which can be rewritten as:
+
+```text
+r = a - q × b
+```
+
+So every new remainder is made from previous values.
+
+Extended GCD simply keeps track of how each remainder was made.
+
+Eventually, when the remainder becomes the GCD, we also know how to express that GCD using the original numbers.
 
 ---
 
-## 2. Forgetting floor division
+# 10. Typical Mistakes
 
-Use:
+## Mistake 1: Using `/` instead of `//`
 
-```python
-a // b
-```
-
-not:
+Wrong:
 
 ```python
 a / b
 ```
 
+Correct:
+
+```python
+a // b
+```
+
+Why?
+
+`/` gives a floating-point number.
+
+`//` gives integer division.
+
+Extended GCD needs integer quotients.
+
 ---
 
-## 3. Wrong recursive update
+## Mistake 2: Returning coefficients in the wrong order
 
-Correct:
+This line matters:
 
 ```python
 x = y1
 y = x1 - (a // b) * y1
 ```
 
----
+If you swap `x` and `y`, your final equation may not verify.
 
-## 4. Confusing inverse with division
-
-Modular inverse is NOT normal division.
-
----
-
-# Pattern Recognition
-
-| Problem Type | Method |
-|---|---|
-| gcd(a,b) | Euclidean Algorithm |
-| ax+by=gcd(a,b) | Extended GCD |
-| inverse mod n | Extended GCD |
-| RSA key generation | Extended GCD |
-| coprime check | gcd(a,b)==1 |
-
----
-
-# Mental Model
-
-GCD:
-- removes unnecessary parts;
-- compresses numbers.
-
-Extended GCD:
-- reconstructs how the gcd was created.
-
----
-
-# Quick Cheatsheet
+Always check:
 
 ```python
-# GCD
-while b:
-    a, b = b, a % b
-
-# Extended GCD
-gcd, x, y = extended_gcd(a, b)
-
-# Modular inverse
-pow(a, -1, mod)
+a * x + b * y == gcd
 ```
+
+---
+
+## Mistake 3: Forgetting negative coefficients are normal
+
+In Extended GCD, one coefficient is often negative.
+
+This is not an error.
+
+Example:
+
+```text
+26513 × 10245 + 32321 × (-8404) = 1
+```
+
+The negative coefficient is required to cancel the larger positive value.
+
+---
+
+## Mistake 4: Thinking prime numbers always have GCD equal to themselves
+
+For two different primes:
+
+```text
+gcd(p, q) = 1
+```
+
+Only if the numbers are the same:
+
+```text
+gcd(p, p) = p
+```
+
+---
+
+## Mistake 5: Confusing GCD with LCM
+
+| Concept | Meaning |
+|---|---|
+| GCD | greatest common divisor |
+| LCM | least common multiple |
+
+They are related, but not the same.
+
+---
+
+# 11. Pattern Summary
+
+| Task Type | What to Look For | Tool |
+|---|---|---|
+| Find greatest divisor | `gcd(a,b)` | Euclidean Algorithm |
+| Check coprime | `gcd(a,b)==1` | GCD |
+| Find `u,v` | `au+bv=gcd(a,b)` | Extended GCD |
+| Find modular inverse | `ax ≡ 1 mod n` | Extended GCD |
+| RSA private exponent | `ed ≡ 1 mod φ(n)` | Extended GCD |
+
+---
+
+# 12. Quick Code Cheatsheet
+
+## Built-in Python
+
+```python
+import math
+
+print(math.gcd(66528, 52920))
+```
+
+---
+
+## Manual GCD
+
+```python
+def gcd(a, b):
+    while b:
+        a, b = b, a % b
+    return a
+```
+
+---
+
+## Extended GCD
+
+```python
+def extended_gcd(a, b):
+    if b == 0:
+        return a, 1, 0
+
+    g, x1, y1 = extended_gcd(b, a % b)
+
+    x = y1
+    y = x1 - (a // b) * y1
+
+    return g, x, y
+```
+
+---
+
+## Modular Inverse with Python
+
+```python
+inverse = pow(a, -1, n)
+```
+
+This works only if:
+
+```text
+gcd(a, n) = 1
+```
+
+---
